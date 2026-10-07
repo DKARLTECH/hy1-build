@@ -6,28 +6,16 @@ jobs:
     steps:
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.20.14'
           cache: false
       - name: Build Hysteria 1 client
         run: |
+          go version
           git clone --depth 1 --branch v1.3.5 https://github.com/apernet/hysteria.git
-          cd hysteria
-          ls
-          find . -name go.mod
-          find . -name main.go
-          OUT="$GITHUB_WORKSPACE/libhysteria1.so"
-          export CGO_ENABLED=0 GOOS=linux GOARCH=arm64
-          if [ -f app/go.mod ]; then
-            cd app
-            go build -trimpath -ldflags "-s -w" -o "$OUT" ./cmd
-          elif [ -d cmd ]; then
-            go build -trimpath -ldflags "-s -w" -o "$OUT" ./cmd
-          else
-            D=$(dirname "$(find . -name main.go | head -n 1)")
-            echo "Using $D"
-            go build -trimpath -ldflags "-s -w" -o "$OUT" "$D"
-          fi
-          ls -la "$OUT"
+          cd hysteria/app
+          export CGO_ENABLED=0 GOOS=linux GOARCH=arm64 GOTOOLCHAIN=local
+          go build -trimpath -ldflags "-s -w" -o "$GITHUB_WORKSPACE/libhysteria1.so" ./cmd
+          ls -la "$GITHUB_WORKSPACE/libhysteria1.so"
       - uses: actions/upload-artifact@v4
         with:
           name: libhysteria1
