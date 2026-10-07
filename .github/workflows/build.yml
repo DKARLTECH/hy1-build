@@ -1,0 +1,18 @@
+name: Build libhysteria1
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Build Hysteria 1 client
+        run: |
+          git clone --depth 1 --branch v1.3.5 https://github.com/apernet/hysteria.git
+          cd hysteria
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags "-s -w" -o ../libhysteria1.so ./cmd
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libhysteria1
+          path: libhysteria1.so
